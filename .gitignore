@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.exe
+*.pdb
+*.user
+*.suo
+*.log
+*.json
+!.vscode/settings.json
