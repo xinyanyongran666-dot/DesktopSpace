@@ -148,6 +148,7 @@ namespace DesktopSpace {
   IntPtr maskedPopup;
   IntPtr trayTaskbar;
   DateTime trayStarted;
+  DateTime lastTrayInvokeAttempt;
   bool trayInvoked;
   bool dismissTrayWhenReady;
   int trayAttempts;
@@ -177,8 +178,11 @@ namespace DesktopSpace {
    Native.Taskbar(false,host.Settings.HideSecondaryTaskbars);
    trayLease=TaskbarVisibility.TryOpen(trayTaskbar);
    if(trayLease==null){host.Notify("暂时无法展开托盘，请再试一次。");return;}
-   Native.SetForegroundWindow(trayTaskbar);
+   uint explorerPid;
+   if(Native.GetWindowThreadProcessId(trayTaskbar,out explorerPid)!=0)Native.AllowSetForegroundWindow(explorerPid);
+   Native.Activate(trayTaskbar);
    trayStarted=DateTime.UtcNow;
+   lastTrayInvokeAttempt=DateTime.MinValue;
    trayInvoked=false;
    dismissTrayWhenReady=false;
    trayAttempts=0;
@@ -200,18 +204,23 @@ namespace DesktopSpace {
     RecordSystemAction(positioned?"tray-anchored":"tray-native",true,trayAttempts);
     return;
    }
-   if((DateTime.UtcNow-trayStarted).TotalMilliseconds>=1400){
+   if((DateTime.UtcNow-trayStarted).TotalMilliseconds>=2600){
     FinishTray();
     ReleasePopup(true);
     RecordSystemAction("tray",false,trayAttempts);
     if(!dismissTrayWhenReady)host.Notify("Windows 托盘暂时未响应，请再试一次。");
     return;
    }
+   if(trayInvoked&&trayAttempts<4&&(DateTime.UtcNow-lastTrayInvokeAttempt).TotalMilliseconds>=450){
+    Native.Activate(trayTaskbar);
+    trayInvoked=false;
+   }
    if(!trayInvoked){
     if(trayPopupMask==null){
      maskedPopup=Native.FindTrayOverflow(true);
      trayPopupMask=TaskbarVisibility.TryMaskPopup(maskedPopup);
     }
+    lastTrayInvokeAttempt=DateTime.UtcNow;
     trayAttempts++;
     trayInvoked=InvokeTrayButton(trayTaskbar);
    }

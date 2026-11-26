@@ -126,7 +126,7 @@ namespace DesktopSpace {
    var connections = new UniformGrid { Columns = 3, Rows = 1, Margin = new Thickness(0, 0, 0, 10) };
    connections.Children.Add(Tile("Wi-Fi", "wifi", "ms-settings:network-wifi", new Thickness(0, 0, 4, 0)));
    connections.Children.Add(Tile("蓝牙", null, "ms-settings:bluetooth", new Thickness(4, 0, 4, 0)));
-   connections.Children.Add(Tile("热点", null, "ms-settings:network-mobilehotspot", new Thickness(4, 0, 0, 0)));
+   connections.Children.Add(Tile("拨号", null, "ms-settings:network-dialup", new Thickness(4, 0, 0, 0)));
    networkSection.Children.Add(connections);
    networkSection.Children.Add(Tile("网络与 Internet 设置", "settings", "ms-settings:network", new Thickness(0)));
    content.Children.Add(networkSection);
